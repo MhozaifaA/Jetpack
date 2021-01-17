@@ -1,10 +1,6 @@
 ﻿<template>
     <h1>This is Game</h1>
-    <button class="btn btn-primary" v-on:click="sayMyName">{{btnText}} my name</button>
-    <button class="btn btn-primary" v-on:click="runGame">{{coun}} </button>
-    <h4>{{myName}}</h4>
-    <input v-model="message" />
-    <p v-if="see">{{message}}</p>
+
     <div class="game">
         <img draggable="false" class="pic" src="../assets/ground.jpg" />
         <img draggable="false" class="pic wave-1" src="../assets/ground1.png" />
@@ -13,14 +9,9 @@
         <img draggable="false" class="pic wave-2" src="../assets/moon1.png" />
         <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
 
-        <div id="palyer" class="flay" v-bind:style="{top:mantop+'px'}" />
-
-        <!--<div  style="position:absolute; width:100px;height:100px;background:black">
-
-        </div>-->
+        <div id="palyer" class="flay" v-bind:style="{top:player_top+'px'}" />
 
     </div>
-
 
 </template>
 
@@ -39,30 +30,32 @@
 
         name: "Jetpack",
 
-        created: function () {
-            document.title = "Jetpack-game";
-            window.addEventListener('keyup', (e) => {
-                console.log(e.keyCode); //87   space 32
-            });
-        },
-
         data() {
             return {
-                myName: "",
-                btnText: "say",
-                message: "dataa",
-                see: true,
-                coun: 180,
-                mantop: 180,
+                player_top: 180,
+                isFillDown: true,
+                isLockDown: false,
             }
-
         },
 
+        created: function () {
+            document.title = "Jetpack-game";
+
+            window.addEventListener('keydown', (e) => {
+                console.log(e.keyCode); //87   space 32  83
+                if (e.keyCode==87) {
+                    this.jumpUp();
+                }
+                if (e.keyCode == 83) {
+                    this.fillDown();
+                }
+            });
+
+        },
+    
         computed: {
-            // a computed getter
             reversedMessage: function () {
-                // `this` points to the vm instance
-                return this.message.split('').reverse().join('')
+                return "";
             }
         },
 
@@ -74,45 +67,53 @@
 
         methods: {
             runGame: async function () {
-                //this.coun = 10;
-                //while (this.coun<100) {
-                // await delay(1000/90);
-                // this.coun++;
-                //}
-                this.tween(10, 100);
+             
             },
-
-            sayMyName: function () {
-                if (this.btnText == "say") {
-                    this.myName = "Jetpack";
-                    this.btnText = "hide";
-                } else {
-                    this.myName = "";
-                    this.btnText = "say";
+            async fillDown() {
+                if (this.player_top >= 380) {
+                    return;
                 }
-                this.see = !this.see;
-            },
-
-
-            tween: function (startValue, endValue) {
-                var vm = this
-                function animate() {
-                    if (TWEEN.update()) {
-                        requestAnimationFrame(animate)
+                this.isFillDown = true;
+                let smooth = 20;
+                while (this.isFillDown) {
+                    await delay(smooth);
+                    this.player_top++;
+                    if (this.player_top >= 380 ) {
+                        this.isFillDown = false;
                     }
+                    smooth -= (40 / 100);
                 }
-                new TWEEN.Tween({ coun: startValue })
-                    .to({ coun: endValue }, 1000)
-                    .onUpdate(function () {
-                        vm.coun = this.coun.toFixed(0);
-                    })
-                    .start()
-                animate()
+                this.isLockDown = false;
+            },
+
+            async jumpUp() {
+
+                if (this.player_top <= 0) {
+                    return;
+                }
+
+                this.isFillDown = false;
+                let toTop = this.player_top - 100;
+                let smooth = 1;
+                while (!this.isFillDown && toTop <= this.player_top) {
+                    await delay(smooth);
+                    this.player_top--;
+                    if (this.player_top <= 0) {
+                        break;
+                    }
+                    smooth+=(20/100);
+                }
+                if (!this.isLockDown) {
+                    this.isLockDown = true;
+                    await delay(100);
+                    this.fillDown();
+                }
             }
+        },
 
-
-
-        }
+        mounted() {
+            this.fillDown();
+        },
     }
 </script>
 
