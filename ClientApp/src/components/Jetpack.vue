@@ -9,8 +9,10 @@
         <img draggable="false" class="pic wave-1" src="../assets/ground3.png" />
         <img draggable="false" class="pic wave-2" src="../assets/moon1.png" />
         <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
-
         <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
+
+
+        <div style="height:100px"></div>
 
     </div>
 
@@ -66,6 +68,7 @@
                 player_left: 160,
                 isFillDown: true,
                 isLockDown: false,
+                isLockForward: false,
                 isPressDown: false,
                 isPressMove: false,
                 isForward: false,
@@ -196,8 +199,9 @@
             },
 
             async forward() {
+                this.isLockForward = false;
                 let toLeft = this.player_left + 10;
-                while (toLeft >= this.player_left) {
+                while (toLeft >= this.player_left && !this.isLockForward ) {
                     await delay(30);
                     this.player_left++;
                     if (this.player_left >= this.maxLeft) {
@@ -210,8 +214,9 @@
             },
 
             async backward() {
+                this.isLockForward = true;
                 let toLeft = this.player_left - 10;
-                while (toLeft <= this.player_left) {
+                while (toLeft <= this.player_left && this.isLockForward) {
                     await delay(30);
                     this.player_left--;
                     if (this.player_left <= this.minLeft) {
