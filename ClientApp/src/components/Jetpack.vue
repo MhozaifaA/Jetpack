@@ -7,8 +7,8 @@
         <img draggable="false" class="pic wave-1" src="../assets/ground1.png" />
         <img draggable="false" class="pic wave-2" src="../assets/ground2.png" />
         <img draggable="false" class="pic wave-1" src="../assets/ground3.png" />
-        <img draggable="false" class="pic wave-2" src="../assets/moon1.png" />
-        <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
+        <img draggable="false" class="pic wave-2" src="../assets/moon1.png"   />
+        <img draggable="false" class="pic wave-3" src="../assets/moon2.png"   />
 
         <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
 
@@ -18,18 +18,42 @@
 
 <script>
 
+  
+
     function delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
+
+    (function preloadImage()
+    {
+        let images = ["../assets/ground1.png", "../assets/ground2.png",
+            "../assets/ground3.png", "../assets/moon1.png",
+            "../assets/moon2.png", "../assets/man/flay/1.png",
+            "../assets/man/flay/2.png",
+            "../assets/man/flay/3.png",
+            "../assets/man/flay/4.png",
+            "../assets/man/flay/5.png",
+            "../assets/man/down.png",
+        ];
+        let ims=[]
+        for (var i in images) {
+            var img = new Image();
+            img.src = i;
+            ims.push(img);
+        }
+    })()
 
     //function randomNextInt(min, max) {
     //    return Math.floor(Math.random() * (max - min + 1) + min);
     //}
 
-
     export default {
 
         name: "Jetpack",
+
+        components: {
+           
+        },
 
         data() {
             return {
@@ -55,6 +79,7 @@
 
             window.addEventListener('keydown', (e) => {
 
+              //  await delay(100);
                 //up 87  down 83   forward 68  backward 65  space 32
                 //up 119  down 115   forward 100  backward 97  space 32
                 this.keydowned = e.key == " " ? "space" : e.key;
@@ -86,9 +111,9 @@
         },
 
         watch: {
-            isFillDown() {
-                console.log("change fill");
-            },
+            //isFillDown() {
+            //    console.log("change fill");
+            //},
         },
 
         methods: {
@@ -105,6 +130,7 @@
             },
 
             async fillDown() {
+
                 if (this.player_top >= this.backgroundLine) {
                     this.isPressDown = false;
                     return;
@@ -112,6 +138,7 @@
                 this.isFillDown = true;
                 let smooth = 20;
                 while (this.isFillDown) {
+
                     await delay(smooth);
                     this.player_top++;
                     if (this.player_top >= this.backgroundLine) {
@@ -144,7 +171,7 @@
                 }
                 if (!this.isLockDown) {
                     this.isLockDown = true;
-                    await delay(100);
+                    await delay(1000);
                     this.fillDown();
                 }
             },
@@ -156,6 +183,7 @@
                     this.player_left++;
                     if (this.player_left >= this.maxLeft) {
                         this.player_left = this.maxLeft;
+                        this.backward();
                         break;
                     }
                 }
@@ -211,6 +239,7 @@
         width: 120px;
         left: 160px;
         top: 180px;
+        /*transition: top 0.5s linear;*/
     }
 
     .down {
