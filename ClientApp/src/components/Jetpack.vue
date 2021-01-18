@@ -9,7 +9,7 @@
         <img draggable="false" class="pic wave-2" src="../assets/moon1.png" />
         <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
 
-        <div id="palyer" class="flay" v-bind:style="{top:player_top+'px'}" />
+        <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
 
     </div>
 
@@ -21,9 +21,9 @@
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    function randomNextInt(min, max) {
-        return Math.floor(Math.random() * (max - min + 1) + min);
-    }
+    //function randomNextInt(min, max) {
+    //    return Math.floor(Math.random() * (max - min + 1) + min);
+    //}
 
 
     export default {
@@ -33,8 +33,11 @@
         data() {
             return {
                 player_top: 180,
+                player_left: 160,
                 isFillDown: true,
                 isLockDown: false,
+                isPressDown: false,
+                isForward: false,
             }
         },
 
@@ -42,35 +45,59 @@
             document.title = "Jetpack-game";
 
             window.addEventListener('keydown', (e) => {
-                console.log(e.keyCode); //87   space 32  83
-                if (e.keyCode==87) {
+
+                 //up 87  down 83   forward 68  backward 65  space 32
+                 //up 119  down 115   forward 100  backward 97  space 32
+
+                console.log(e.keyCode);
+                if (e.keyCode == 87) {
                     this.jumpUp();
-                }
-                if (e.keyCode == 83) {
+                } else
+                    if (e.keyCode == 83) {
+                    this.isPressDown = true;
                     this.fillDown();
                 }
+
+                if (e.keyCode == 68) {
+                    this.forward();
+                } else if (e.keyCode == 65) {
+                    this.backward();
+                }
+
+
+
             });
 
         },
     
         computed: {
-            reversedMessage: function () {
-                return "";
+            changeClass: function () {
+                return this.isPressDown ? 'down' : 'flay';
             }
         },
 
         watch: {
-            message: function () {
-
+            isFillDown() {
+                console.log("change fill");
             },
         },
 
         methods: {
+
+            engine() {
+                this.fillDown();
+                this.jumpUp();
+                this.forward();
+                this.backward();
+            },
+
             runGame: async function () {
              
             },
+
             async fillDown() {
                 if (this.player_top >= 380) {
+                    this.isPressDown = false;
                     return;
                 }
                 this.isFillDown = true;
@@ -84,6 +111,7 @@
                     smooth -= (40 / 100);
                 }
                 this.isLockDown = false;
+                this.isPressDown = false;
             },
 
             async jumpUp() {
@@ -108,11 +136,30 @@
                     await delay(100);
                     this.fillDown();
                 }
+            },
+
+            async forward() {
+                let toLeft = this.player_left + 10;
+                while (toLeft >= this.player_left) {
+                    await delay(30);
+                    this.player_left++;
+                }
+            },
+
+              async backward() {
+                let toLeft = this.player_left - 10;
+                while (toLeft <= this.player_left) {
+                    await delay(30);
+                    this.player_left--;
+                }
             }
+
+
         },
 
         mounted() {
             this.fillDown();
+           // window.requestAnimationFrame(this.engine());
         },
     }
 </script>
@@ -131,6 +178,10 @@
         width: 120px;
         left: 160px;
         top: 180px;
+    }
+
+    .down {
+        background: url(../assets/man/down.png);
     }
 
     .flay {
