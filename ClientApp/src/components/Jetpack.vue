@@ -7,8 +7,8 @@
         <img draggable="false" class="pic wave-1" src="../assets/ground1.png" />
         <img draggable="false" class="pic wave-2" src="../assets/ground2.png" />
         <img draggable="false" class="pic wave-1" src="../assets/ground3.png" />
-        <img draggable="false" class="pic wave-2" src="../assets/moon1.png"   />
-        <img draggable="false" class="pic wave-3" src="../assets/moon2.png"   />
+        <img draggable="false" class="pic wave-2" src="../assets/moon1.png" />
+        <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
 
         <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
 
@@ -18,14 +18,13 @@
 
 <script>
 
-  
+
 
     function delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    (function preloadImage()
-    {
+    (function preloadImage() {
         let images = ["../assets/ground1.png", "../assets/ground2.png",
             "../assets/ground3.png", "../assets/moon1.png",
             "../assets/moon2.png", "../assets/man/flay/1.png",
@@ -35,7 +34,7 @@
             "../assets/man/flay/5.png",
             "../assets/man/down.png",
         ];
-        let ims=[]
+        let ims = []
         for (var i in images) {
             var img = new Image();
             img.src = i;
@@ -52,7 +51,7 @@
         name: "Jetpack",
 
         components: {
-           
+
         },
 
         data() {
@@ -62,6 +61,7 @@
                 isFillDown: true,
                 isLockDown: false,
                 isPressDown: false,
+                isPressMove: false,
                 isForward: false,
 
                 keydowned: "",
@@ -76,14 +76,14 @@
             this.backgroundLine = 380;
             this.minTop = this.backgroundLine;
 
+            window.addEventListener('keyup', async () => { this.isPressMove = false; });
 
-            window.addEventListener('keydown', (e) => {
+            window.addEventListener('keydown', async (e) => {
 
-              //  await delay(100);
+                //  await delay(100);
                 //up 87  down 83   forward 68  backward 65  space 32
                 //up 119  down 115   forward 100  backward 97  space 32
                 this.keydowned = e.key == " " ? "space" : e.key;
-                console.log(e.keyCode);
                 if (e.keyCode == 87) {
                     this.jumpUp();
                 } else
@@ -93,11 +93,12 @@
                     }
 
                 if (e.keyCode == 68) {
+                    this.isPressMove = true;
                     this.forward();
                 } else if (e.keyCode == 65) {
+                    this.isPressMove = true;
                     this.backward();
                 }
-
 
 
             });
@@ -106,7 +107,14 @@
 
         computed: {
             changeClass: function () {
-                return this.isPressDown ? 'down' : 'flay';
+                let className = this.isPressDown ? 'down' : 'flay';
+                if (this.player_top == this.backgroundLine) {
+                    className = "stand";
+                    if (this.isPressMove) {
+                        className = "run";
+                    }
+                }
+                return className ;
             }
         },
 
@@ -171,7 +179,7 @@
                 }
                 if (!this.isLockDown) {
                     this.isLockDown = true;
-                    await delay(1000);
+                    await delay(800);
                     this.fillDown();
                 }
             },
@@ -187,6 +195,7 @@
                         break;
                     }
                 }
+
             },
 
             async backward() {
@@ -198,7 +207,6 @@
                         this.player_left = this.minLeft;
                         break;
                     }
-
                 }
             }
 
@@ -250,29 +258,73 @@
         animation: flay 0.6s linear infinite;
     }
 
+    .run {
+        animation: run 0.6s linear infinite;
+    }
+
+    .stand {
+        background: url(../assets/man/stand.png);
+    }
+
+    @keyframes run {
+        0% {
+            background: url(../assets/man/run/1.png);
+        }
+        20% {
+            background: url(../assets/man/run/2.png);
+        }
+        40% {
+            background: url(../assets/man/run/3.png);
+        }
+        60% {
+            background: url(../assets/man/run/4.png);
+        }
+        80% {
+            background: url(../assets/man/run/5.png);
+        }
+       /* 50% {
+            background: url(../assets/man/run/6.png);
+        }
+        60% {
+            background: url(../assets/man/run/7.png);
+        }
+        70% {
+            background: url(../assets/man/run/8.png);
+        }
+        80% {
+            background: url(../assets/man/run/9.png);
+        }
+        90% {
+            background: url(../assets/man/run/10.png);
+        }*/
+        100% {
+            background: url(../assets/man/run/1.png);
+        }
+    }
+
     @keyframes flay {
         0% {
             background: url(../assets/man/flay/1.png);
         }
 
         20% {
-            background: url(../assets/man/flay/1.png);
-        }
-
-        40% {
             background: url(../assets/man/flay/2.png);
         }
 
-        60% {
+        40% {
             background: url(../assets/man/flay/3.png);
         }
 
-        80% {
+        60% {
             background: url(../assets/man/flay/4.png);
         }
 
-        100% {
+        80% {
             background: url(../assets/man/flay/5.png);
+        }
+
+        100% {
+            background: url(../assets/man/flay/1.png);
         }
     }
 
@@ -327,31 +379,3 @@
     }
 </style>
 
-
-
-
-<!--console.clear()
-new Vue({
-  el: "div",
-  data() {
-    return {
-      time: 0,
-      isRunning: false,
-      interval: null
-    }
-  },
-  methods: {
-    toggleTimer() {
-      if (this.isRunning) {
-        clearInterval(this.interval);
-        console.log('timer stops');
-      } else {
-        this.interval = setInterval(this.incrementTime, 1000);
-      }
-      this.isRunning = !this.isRunning
-    },
-    incrementTime() {
-      this.time = parseInt(this.time) + 1;
-    },
-  }
-})-->
