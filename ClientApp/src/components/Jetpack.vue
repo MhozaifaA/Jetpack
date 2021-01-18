@@ -33,6 +33,12 @@
             "../assets/man/flay/4.png",
             "../assets/man/flay/5.png",
             "../assets/man/down.png",
+            "../assets/man/stand.png",
+            "../assets/man/run/1.png",
+            "../assets/man/run/2.png",
+            "../assets/man/run/3.png",
+            "../assets/man/run/4.png",
+            "../assets/man/run/5.png",
         ];
         let ims = []
         for (var i in images) {
@@ -84,6 +90,7 @@
                 //up 87  down 83   forward 68  backward 65  space 32
                 //up 119  down 115   forward 100  backward 97  space 32
                 this.keydowned = e.key == " " ? "space" : e.key;
+
                 if (e.keyCode == 87) {
                     this.jumpUp();
                 } else
@@ -99,6 +106,8 @@
                     this.isPressMove = true;
                     this.backward();
                 }
+
+               
 
 
             });
@@ -180,7 +189,9 @@
                 if (!this.isLockDown) {
                     this.isLockDown = true;
                     await delay(800);
-                    this.fillDown();
+                    if (this.isFillDown == false) {
+                     this.fillDown();
+                    }
                 }
             },
 
