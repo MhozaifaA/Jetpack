@@ -1,5 +1,6 @@
 ﻿<template>
-    <h1>This is Game</h1>
+    <h1>This Is Demo</h1>
+    <p> any keydown will block others -- move wisely <span class="keyBox">{{keydowned}}</span> </p>
 
     <div class="game">
         <img draggable="false" class="pic" src="../assets/ground.jpg" />
@@ -38,6 +39,8 @@
                 isLockDown: false,
                 isPressDown: false,
                 isForward: false,
+
+                keydowned:"",
             }
         },
 
@@ -47,8 +50,8 @@
             window.addEventListener('keydown', (e) => {
 
                  //up 87  down 83   forward 68  backward 65  space 32
-                 //up 119  down 115   forward 100  backward 97  space 32
-
+                //up 119  down 115   forward 100  backward 97  space 32
+                this.keydowned = e.key == " " ? "space" : e.key;
                 console.log(e.keyCode);
                 if (e.keyCode == 87) {
                     this.jumpUp();
@@ -166,6 +169,19 @@
 
 
 <style scoped>
+
+    .keyBox{
+        border-style:solid;
+        border-color:darkslategrey;
+        border-width:2px;
+        border-radius:3px;
+        padding:2px;
+        color:gray;
+        font-weight:bolder;
+        text-transform:capitalize; 
+        margin:2px;
+    }
+
     * {
         user-select: none;
         user-drag: none;
