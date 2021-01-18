@@ -1,7 +1,7 @@
 ﻿<template>
     <h1>This Is Demo</h1>
     <p> any keydown will block others -- move wisely <span class="keyBox">{{keydowned}}</span> </p>
-
+    <p>{{countdie}}</p>
     <div class="game">
         <img draggable="false" class="pic" src="../assets/ground.jpg" />
         <img draggable="false" class="pic wave-1" src="../assets/ground1.png" />
@@ -11,8 +11,7 @@
         <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
         <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
 
-
-        <div style="height:100px"></div>
+        <div class="testdev" v-for="enemy in enemies" v-bind:key="enemy.id" v-bind:style="{top:enemy.top+'px',left:enemy.left+'px'}"> </div>
 
     </div>
 
@@ -48,7 +47,7 @@
             img.src = i;
             ims.push(img);
         }
-    })()
+    })() //demons song
 
     //function randomNextInt(min, max) {
     //    return Math.floor(Math.random() * (max - min + 1) + min);
@@ -72,8 +71,9 @@
                 isPressDown: false,
                 isPressMove: false,
                 isForward: false,
-
                 keydowned: "",
+                countdie: 0,
+                enemies: [{ id: 1, top: 10, left:1100 }] 
             }
         },
 
@@ -137,7 +137,7 @@
         },
 
         methods: {
-
+        
             engine() {
                 this.fillDown();
                 this.jumpUp();
@@ -145,8 +145,36 @@
                 this.backward();
             },
 
-            runGame: async function () {
+            isinterscect:function(rectA, rectB) {
+                return !(rectA.x + rectA.width < rectB.x ||
+                    rectB.x + rectB.width < rectA.x ||
+                    rectA.y + rectA.height < rectB.y ||
+                    rectB.y + rectB.height < rectA.y);
+            },
 
+            runEnemies: async function () {
+                let yep = true;
+                let done = true;
+                while (done) {
+                    await delay(1);
+
+                    
+
+                    for (var i = 0; i < this.enemies.length; i++) {
+                        if (yep) {
+                            this.enemies[i].left--;
+                        } else
+                            this.enemies[i].left++;
+                        if (this.enemies[i].left == 0 || this.enemies[i].left==1101 ) {
+                            yep = !yep;
+                        }
+
+                        if (this.isinterscect({ x: this.player_left+10, y: this.player_top+10, height: 150-10, width: 120-10 }, { x: this.enemies[i].left, y: this.enemies[i].top, height: 100, width: 100 })) {
+                            this.countdie++;
+                        }
+
+                    }
+               }
             },
 
             async fillDown() {
@@ -231,6 +259,7 @@
 
         mounted() {
             this.fillDown();
+            this.runEnemies();
             // window.requestAnimationFrame(this.engine());
         },
     }
@@ -238,6 +267,21 @@
 
 
 <style scoped>
+
+    .testdev {
+        position: absolute;
+        height: 100px;
+        width: 100px;
+        left: 1100px;
+        top: 270px;
+        background: red;
+    }
+  
+    @keyframes spin {
+        100% {
+            transform: rotate(360deg);
+        }
+    }
 
     .keyBox {
         border-style: solid;
