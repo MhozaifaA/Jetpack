@@ -40,16 +40,22 @@
                 isPressDown: false,
                 isForward: false,
 
-                keydowned:"",
+                keydowned: "",
             }
         },
 
         created: function () {
             document.title = "Jetpack-game";
+            this.minLeft = 0;
+            this.maxLeft = 1000;
+            this.maxTop = 0;
+            this.backgroundLine = 380;
+            this.minTop = this.backgroundLine;
+
 
             window.addEventListener('keydown', (e) => {
 
-                 //up 87  down 83   forward 68  backward 65  space 32
+                //up 87  down 83   forward 68  backward 65  space 32
                 //up 119  down 115   forward 100  backward 97  space 32
                 this.keydowned = e.key == " " ? "space" : e.key;
                 console.log(e.keyCode);
@@ -57,9 +63,9 @@
                     this.jumpUp();
                 } else
                     if (e.keyCode == 83) {
-                    this.isPressDown = true;
-                    this.fillDown();
-                }
+                        this.isPressDown = true;
+                        this.fillDown();
+                    }
 
                 if (e.keyCode == 68) {
                     this.forward();
@@ -72,7 +78,7 @@
             });
 
         },
-    
+
         computed: {
             changeClass: function () {
                 return this.isPressDown ? 'down' : 'flay';
@@ -95,11 +101,11 @@
             },
 
             runGame: async function () {
-             
+
             },
 
             async fillDown() {
-                if (this.player_top >= 380) {
+                if (this.player_top >= this.backgroundLine) {
                     this.isPressDown = false;
                     return;
                 }
@@ -108,7 +114,8 @@
                 while (this.isFillDown) {
                     await delay(smooth);
                     this.player_top++;
-                    if (this.player_top >= 380 ) {
+                    if (this.player_top >= this.backgroundLine) {
+                        this.player_top = this.backgroundLine;
                         this.isFillDown = false;
                     }
                     smooth -= (40 / 100);
@@ -119,7 +126,7 @@
 
             async jumpUp() {
 
-                if (this.player_top <= 0) {
+                if (this.player_top <= this.maxTop) {
                     return;
                 }
 
@@ -129,10 +136,11 @@
                 while (!this.isFillDown && toTop <= this.player_top) {
                     await delay(smooth);
                     this.player_top--;
-                    if (this.player_top <= 0) {
+                    if (this.player_top <= this.maxTop) {
+                        this.player_top = this.maxTop;
                         break;
                     }
-                    smooth+=(20/100);
+                    smooth += (20 / 100);
                 }
                 if (!this.isLockDown) {
                     this.isLockDown = true;
@@ -146,14 +154,23 @@
                 while (toLeft >= this.player_left) {
                     await delay(30);
                     this.player_left++;
+                    if (this.player_left >= this.maxLeft) {
+                        this.player_left = this.maxLeft;
+                        break;
+                    }
                 }
             },
 
-              async backward() {
+            async backward() {
                 let toLeft = this.player_left - 10;
                 while (toLeft <= this.player_left) {
                     await delay(30);
                     this.player_left--;
+                    if (this.player_left <= this.minLeft) {
+                        this.player_left = this.minLeft;
+                        break;
+                    }
+
                 }
             }
 
@@ -162,7 +179,7 @@
 
         mounted() {
             this.fillDown();
-           // window.requestAnimationFrame(this.engine());
+            // window.requestAnimationFrame(this.engine());
         },
     }
 </script>
@@ -170,16 +187,16 @@
 
 <style scoped>
 
-    .keyBox{
-        border-style:solid;
-        border-color:darkslategrey;
-        border-width:2px;
-        border-radius:3px;
-        padding:2px;
-        color:gray;
-        font-weight:bolder;
-        text-transform:capitalize; 
-        margin:2px;
+    .keyBox {
+        border-style: solid;
+        border-color: darkslategrey;
+        border-width: 2px;
+        border-radius: 3px;
+        padding: 2px;
+        color: gray;
+        font-weight: bolder;
+        text-transform: capitalize;
+        margin: 2px;
     }
 
     * {
