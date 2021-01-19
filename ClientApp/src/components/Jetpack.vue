@@ -1,7 +1,9 @@
 ﻿<template>
-    <h1>This Is Demo</h1>
     <p> any keydown will block others -- move wisely <span class="keyBox">{{keydowned}}</span> </p>
-    <p>{{countdie}}</p>
+    <span  v-for="h in countdie" v-bind:key="h" class="hart"></span>
+    <h2  v-if="countdie==0" >You Lost</h2>
+    <button  v-if="countdie==0" class="btn btn-outline-success my-1" @click="restart">Play</button>
+  
     <div class="game">
         <img draggable="false" class="pic" src="../assets/ground.jpg" />
         <img draggable="false" class="pic wave-1" src="../assets/ground1.png" />
@@ -11,7 +13,7 @@
         <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
         <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
 
-        <div class="testdev" v-for="enemy in enemies" v-bind:key="enemy.id" v-bind:style="{top:enemy.top+'px',left:enemy.left+'px'}"> </div>
+        <div v-for="enemy in enemies" v-bind:key="enemy.id" v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}" v-bind:class="enemy.class"> </div>
 
     </div>
 
@@ -23,6 +25,13 @@
 
     function delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function isInterscect(rectA, rectB) {
+        return !(rectA.x + rectA.width < rectB.x ||
+            rectB.x + rectB.width < rectA.x ||
+            rectA.y + rectA.height < rectB.y ||
+            rectB.y + rectB.height < rectA.y);
     }
 
     (function preloadImage() {
@@ -49,9 +58,9 @@
         }
     })() //demons song
 
-    //function randomNextInt(min, max) {
-    //    return Math.floor(Math.random() * (max - min + 1) + min);
-    //}
+   function randomNextInt(min, max) {
+       return Math.floor(Math.random() * (max - min + 1) + min);
+   }
 
     export default {
 
@@ -72,8 +81,9 @@
                 isPressMove: false,
                 isForward: false,
                 keydowned: "",
-                countdie: 0,
-                enemies: [{ id: 1, top: 0, left:1100 }] 
+                countdie: 5,
+                enemies: [],
+                enemyKey: 0,
             }
         },
 
@@ -83,17 +93,23 @@
             this.maxLeft = 1000;
             this.maxTop = 0;
             this.backgroundLine = 380;
-            this.minTop = this.backgroundLine;
+            this.minTop = this.backgroundLine; 
+            this.player_width = 120;
+            this.player_height = 150;
+            /////*****const
 
-            window.addEventListener('keyup', async () => { this.isPressMove = false; });
+            this.caltoCreatEnemy = 0;
+            this.pointtoCreatEnemy = 120;
+            this.isLost = false;
+
+            window.addEventListener('keyup', () => { this.isPressMove = false; });
 
             window.addEventListener('keydown', async (e) => {
-
+                if (this.isLost) return;
                 //  await delay(100);
                 //up 87  down 83   forward 68  backward 65  space 32
                 //up 119  down 115   forward 100  backward 97  space 32
                 this.keydowned = e.key == " " ? "space" : e.key;
-
                 if (e.keyCode == 87) {
                     this.jumpUp();
                 } else
@@ -101,7 +117,6 @@
                         this.isPressDown = true;
                         this.fillDown();
                     }
-
                 if (e.keyCode == 68) {
                     this.isPressMove = true;
                     this.forward();
@@ -110,9 +125,9 @@
                     this.backward();
                 }
 
-               
+                //if (e.keyCode == 32) {
 
-
+                //}
             });
 
         },
@@ -125,8 +140,13 @@
                     if (this.isPressMove) {
                         className = "run";
                     }
+
+                  //  className = "shootflay";
                 }
-                return className ;
+
+
+
+                return className;
             }
         },
 
@@ -137,7 +157,7 @@
         },
 
         methods: {
-        
+
             engine() {
                 this.fillDown();
                 this.jumpUp();
@@ -145,37 +165,57 @@
                 this.backward();
             },
 
-            isinterscect:function(rectA, rectB) {
-                return !(rectA.x + rectA.width < rectB.x ||
-                    rectB.x + rectB.width < rectA.x ||
-                    rectA.y + rectA.height < rectB.y ||
-                    rectB.y + rectB.height < rectA.y);
+            createEnemy(num) {
+               // let min_top = 10; 30   420
+                let _top = randomNextInt(30, 420);
+                switch (num) {
+                    case 1:
+                        return { id: this.enemyKey++, top: _top, left: 1200, size:120, class: "enemy-1" };
+                    case 2:
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 100, class: "enemy-2" };
+                    case 3:
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 80, class: "enemy-3" };
+                    case 4:
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 60, class: "enemy-4" };
+                    default:
+                        return { id: this.enemyKey++, top: 0, left: 1200, size: 120, class: "enemy-moon" };
+                }
             },
+        
+            runEnemies() {
 
-           async runEnemies() {
-                //let loop = true;
-                //while (loop) {
-                //    await delay(10);
-                    for (var i = 0; i < this.enemies.length; i++) {
-                        this.enemies[i].left-=10;
-                        if (this.enemies[i].left == 1000) {
-                            this.enemies.push({ id: this.enemies[i].id+1, top: 0, left: 1200 });
-                        }
+                this.caltoCreatEnemy++;
+                if (this.enemies.length==0) {
+                    this.enemies.push(this.createEnemy(randomNextInt(4,4)));
+                }
+             
+                if (this.caltoCreatEnemy == this.pointtoCreatEnemy) {
+                    this.enemies.push(this.createEnemy(randomNextInt(4, 4)));
+                    this.pointtoCreatEnemy = this.caltoCreatEnemy + randomNextInt(240, 1000);
+                }
 
-                        if (this.enemies[i].left == -100) {
-                            this.enemies.shift();
+                for (var i = 0; i < this.enemies.length; i++) {
+                    this.enemies[i].left -= 1;
+                 
+                    let offset = 30;
+                    let player = { x: this.player_left + offset, y: this.player_top + offset, height: this.player_height - offset, width: this.player_width - offset };
+                    let enemy = { x: this.enemies[i].left + offset, y: this.enemies[i].top + offset, height: this.enemies[i].size - offset, width: this.enemies[i].size - offset };
+                  
+                    if (isInterscect(player, enemy)) {
+                        this.backward(true);
+                        this.countdie--; //lost
+                        if (this.countdie == 0) {
+                            this.isLost = true;
                         }
-                        
-                        if (this.isinterscect({ x: this.player_left + 10, y: this.player_top + 10, height: 150 - 10, width: 100 - 10 },
-                            { x: this.enemies[i].left + 10, y: this.enemies[i].top + 10, height: 100-10, width: 100-10 })) {
-                            this.countdie++;
-                        }
-
                     }
 
-                    window.requestAnimationFrame(this.runEnemies);
-
-               //}
+                    if (this.enemies[i].left == -this.enemies[i].size) {
+                        this.enemies.shift();
+                    }
+                    
+                }
+                if (!this.isLost)
+                window.requestAnimationFrame(this.runEnemies);
             },
 
             helpfillDown(smooth) {
@@ -184,7 +224,7 @@
                     this.player_top = this.backgroundLine;
                     this.isFillDown = false;
                 }
-            
+
                 if (this.isFillDown) {
                     smooth += 0.2;
                     window.requestAnimationFrame(() => this.helpfillDown(smooth));
@@ -194,45 +234,32 @@
                 }
             },
 
-             fillDown() {
+            fillDown() {
 
                 if (this.player_top >= this.backgroundLine) {
                     this.isPressDown = false;
                     return;
                 }
-                 this.isFillDown = true;
-
-               // let smooth = 20;
+                this.isFillDown = true;
                 this.helpfillDown(1);
-                //while (this.isFillDown) {
-
-                //    await delay(smooth);
-                //    this.player_top++;
-                //    if (this.player_top >= this.backgroundLine) {
-                //        this.player_top = this.backgroundLine;
-                //        this.isFillDown = false;
-                //    }
-                //    smooth -= (40 / 100);
-                //}
-                //this.isLockDown = false;
-                //this.isPressDown = false;
             },
 
-          async helpjumpUp(toTop,smooth) {
+            async helpjumpUp(toTop, smooth) {
                 this.player_top -= smooth;
+                let breaked = false;
                 if (this.player_top <= this.maxTop) {
                     this.player_top = this.maxTop;
-                    return;
+                    breaked = true;
                 }
-                if (!this.isFillDown && toTop <= this.player_top) {
+                if (!this.isFillDown && toTop <= this.player_top && !breaked) {
                     smooth -= smooth * 3 / 100;
                     window.requestAnimationFrame(() => this.helpjumpUp(toTop, smooth));
                 } else {
-                       if (!this.isLockDown) {
+                    if (!this.isLockDown) {
                         this.isLockDown = true;
                         await delay(800);
                         if (this.isFillDown == false) {
-                         this.fillDown();
+                            this.fillDown();
                         }
                     }
                 }
@@ -244,29 +271,9 @@
                     return;
                 }
 
-                 this.isFillDown = false;
-                 let toTop = this.player_top - 100;
-                 //let smooth = 1;
-
-                 this.helpjumpUp(toTop, 5);
-
-                //while (!this.isFillDown && toTop <= this.player_top) {
-                //    await delay(smooth);
-                //    this.player_top--;
-                //    if (this.player_top <= this.maxTop) {
-                //        this.player_top = this.maxTop;
-                //        break;
-                //    }
-                //    smooth += (20 / 100);
-                //}
-
-                //if (!this.isLockDown) {
-                //    this.isLockDown = true;
-                //  //  await delay(800);
-                //    if (this.isFillDown == false) {
-                //     this.fillDown();
-                //    }
-                //}
+                this.isFillDown = false;
+                let toTop = this.player_top - 100;
+                this.helpjumpUp(toTop, 5);
             },
 
             helpforward(toLeft) {
@@ -280,73 +287,121 @@
                     window.requestAnimationFrame(() => { this.helpforward(toLeft); });
                 }
             },
-             
-             forward() {
+
+            forward() {
                 this.isLockForward = false;
-                 let toLeft = this.player_left + 10;
-                 this.helpforward(toLeft);
-             //   while (toLeft >= this.player_left && !this.isLockForward ) {
-                  //  await delay(30);
-                    //this.player_left++;
-                    //if (this.player_left >= this.maxLeft) {
-                    //    this.player_left = this.maxLeft;
-                    //    this.backward();
-                    //    return;
-                    //}
-               // }
-              
+                let toLeft = this.player_left + 10;
+                this.helpforward(toLeft);
             },
 
-            helpbackward(toLeft) {
-                this.player_left--;
+            helpbackward(toLeft, speed) {
+                this.player_left -= speed;
                 if (this.player_left <= this.minLeft) {
                     this.player_left = this.minLeft;
                     return;
                 }
                 if (toLeft <= this.player_left && this.isLockForward)
-                    window.requestAnimationFrame(() => { this.helpbackward(toLeft); });
+                    window.requestAnimationFrame(() => { this.helpbackward(toLeft, speed); });
             },
 
-             backward() {
+            backward(force) {
                 this.isLockForward = true;
-                 let toLeft = this.player_left - 10;
-                 this.helpbackward(toLeft);
-                //while (toLeft <= this.player_left && this.isLockForward) {
-                //    await delay(30);
-                //    this.player_left--;
-                //    if (this.player_left <= this.minLeft) {
-                //        this.player_left = this.minLeft;
-                //        break;
-                //    }
-                //}
-            }
+                let toLeft = this.player_left - 10;
+                let speed = 1;
+                if (force === true) {
+                    toLeft = this.minLeft;
+                    speed = 10;
+                    this.isForward = false;
+                    this.isFillDown = false;
+                    this.isPressDown= false;
+                    this.isPressMove = false;
+                } 
+                this.helpbackward(toLeft, speed);
 
+            },
+
+            restart() {
+                this.player_top = 180,
+                this.player_left = 160,
+                this.isFillDown = true,
+                this.isLockDown = false,
+                this.isLockForward = false,
+                this.isPressDown = false,
+                this.isPressMove = false,
+                this.isForward = false,
+                this.keydowned = "",
+                this.countdie = 5,
+                this.enemies = [],
+                this.enemyKey = 0,
+                this.caltoCreatEnemy = 0;
+                this.pointtoCreatEnemy = 120;
+                this.isLost = false;
+                this.fillDown();
+                this.runEnemies();
+            },
 
         },
 
         mounted() {
+        
             this.fillDown();
             this.runEnemies();
-            // window.requestAnimationFrame(this.engine());
         },
+
+
     }
 </script>
 
 
 <style scoped>
 
-    .testdev {
-        position: absolute;
-        height:100px;
-        width: 100px;
-        background: red;
+    .hart::after {
+        content: '❤';
+        color: red;
+        font-size: 24px;
     }
-  
-    @keyframes spin {
+
+    .enemy-1 {
+        position: absolute;
+        height: 120px;
+        width: 120px;
+        background: url(../assets/enemy/1.png) no-repeat;
+    }
+
+    .enemy-2 {
+        position: absolute;
+        height: 100px;
+        width: 100px;
+        background: url(../assets/enemy/2.png) no-repeat;
+    }
+
+    .enemy-3 {
+        position: absolute;
+        height: 80px;
+        width:80px;
+        background: url(../assets/enemy/3.png) no-repeat;
+    }
+
+    .enemy-4 {
+        position: absolute;
+        height: 60px;
+        width:60px;
+        background: url(../assets/enemy/4.png) no-repeat;
+    }
+
+
+    .enemy-moon {
+        position: absolute;
+        height: 120px;
+        width: 120px;
+        background: url(../assets/enemy/moon.png) no-repeat;
+    }
+
+  /*  @keyframes spin {
         100% {
             transform: rotate(360deg);
         }
-    }
+    }*/
 
     .keyBox {
         border-style: solid;
@@ -376,7 +431,7 @@
     }
 
     .down {
-        background: url(../assets/man/down.png);
+        background: url(../assets/man/down.png) no-repeat;
     }
 
     .flay {
@@ -388,26 +443,59 @@
     }
 
     .stand {
-        background: url(../assets/man/stand.png);
+        background: url(../assets/man/stand.png) no-repeat;
+    }
+
+    .shootflay {
+        animation: shootflay 0.6s linear infinite;
+    }
+
+  
+
+    @keyframes shootflay {
+        0% {
+            background: url(../assets/man/shootflay/1.png) no-repeat;
+        }
+
+        25% {
+            background: url(../assets/man/shootflay/2.png) no-repeat;
+        }
+
+        50% {
+            background: url(../assets/man/shootflay/3.png) no-repeat;
+        }
+
+        75% {
+            background: url(../assets/man/shootflay/4.png) no-repeat;
+        }
+
+        100% {
+            background: url(../assets/man/shootflay/1.png) no-repeat;
+        }
+
     }
 
     @keyframes run {
         0% {
-            background: url(../assets/man/run/1.png);
+            background: url(../assets/man/run/1.png) no-repeat;
         }
+
         20% {
-            background: url(../assets/man/run/2.png);
+            background: url(../assets/man/run/2.png) no-repeat;
         }
+
         40% {
-            background: url(../assets/man/run/3.png);
+            background: url(../assets/man/run/3.png) no-repeat;
         }
+
         60% {
-            background: url(../assets/man/run/4.png);
+            background: url(../assets/man/run/4.png) no-repeat;
         }
+
         80% {
-            background: url(../assets/man/run/5.png);
+            background: url(../assets/man/run/5.png) no-repeat;
         }
-       /* 50% {
+        /* 50% {
             background: url(../assets/man/run/6.png);
         }
         60% {
@@ -423,33 +511,33 @@
             background: url(../assets/man/run/10.png);
         }*/
         100% {
-            background: url(../assets/man/run/1.png);
+            background: url(../assets/man/run/1.png) no-repeat;
         }
     }
 
     @keyframes flay {
         0% {
-            background: url(../assets/man/flay/1.png);
+            background: url(../assets/man/flay/1.png) no-repeat;
         }
 
         20% {
-            background: url(../assets/man/flay/2.png);
+            background: url(../assets/man/flay/2.png) no-repeat;
         }
 
         40% {
-            background: url(../assets/man/flay/3.png);
+            background: url(../assets/man/flay/3.png) no-repeat;
         }
 
         60% {
-            background: url(../assets/man/flay/4.png);
+            background: url(../assets/man/flay/4.png) no-repeat;
         }
 
         80% {
-            background: url(../assets/man/flay/5.png);
+            background: url(../assets/man/flay/5.png) no-repeat;
         }
 
         100% {
-            background: url(../assets/man/flay/1.png);
+            background: url(../assets/man/flay/1.png) no-repeat;
         }
     }
 
