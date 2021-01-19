@@ -73,7 +73,7 @@
                 isForward: false,
                 keydowned: "",
                 countdie: 0,
-                enemies: [{ id: 1, top: 10, left:1100 }] 
+                enemies: [{ id: 1, top: 0, left:1100 }] 
             }
         },
 
@@ -152,106 +152,173 @@
                     rectB.y + rectB.height < rectA.y);
             },
 
-            runEnemies: async function () {
-                let yep = true;
-                let done = true;
-                while (done) {
-                    await delay(1);
-
-                    
-
+           async runEnemies() {
+                //let loop = true;
+                //while (loop) {
+                //    await delay(10);
                     for (var i = 0; i < this.enemies.length; i++) {
-                        if (yep) {
-                            this.enemies[i].left--;
-                        } else
-                            this.enemies[i].left++;
-                        if (this.enemies[i].left == 0 || this.enemies[i].left==1101 ) {
-                            yep = !yep;
+                        this.enemies[i].left-=10;
+                        if (this.enemies[i].left == 1000) {
+                            this.enemies.push({ id: this.enemies[i].id+1, top: 0, left: 1200 });
                         }
 
-                        if (this.isinterscect({ x: this.player_left+10, y: this.player_top+10, height: 150-10, width: 120-10 }, { x: this.enemies[i].left, y: this.enemies[i].top, height: 100, width: 100 })) {
+                        if (this.enemies[i].left == -100) {
+                            this.enemies.shift();
+                        }
+                        
+                        if (this.isinterscect({ x: this.player_left + 10, y: this.player_top + 10, height: 150 - 10, width: 100 - 10 },
+                            { x: this.enemies[i].left + 10, y: this.enemies[i].top + 10, height: 100-10, width: 100-10 })) {
                             this.countdie++;
                         }
 
                     }
-               }
+
+                    window.requestAnimationFrame(this.runEnemies);
+
+               //}
             },
 
-            async fillDown() {
+            helpfillDown(smooth) {
+                this.player_top += smooth;
+                if (this.player_top >= this.backgroundLine) {
+                    this.player_top = this.backgroundLine;
+                    this.isFillDown = false;
+                }
+            
+                if (this.isFillDown) {
+                    smooth += 0.2;
+                    window.requestAnimationFrame(() => this.helpfillDown(smooth));
+                } else {
+                    this.isLockDown = false;
+                    this.isPressDown = false;
+                }
+            },
+
+             fillDown() {
 
                 if (this.player_top >= this.backgroundLine) {
                     this.isPressDown = false;
                     return;
                 }
-                this.isFillDown = true;
-                let smooth = 20;
-                while (this.isFillDown) {
+                 this.isFillDown = true;
 
-                    await delay(smooth);
-                    this.player_top++;
-                    if (this.player_top >= this.backgroundLine) {
-                        this.player_top = this.backgroundLine;
-                        this.isFillDown = false;
-                    }
-                    smooth -= (40 / 100);
-                }
-                this.isLockDown = false;
-                this.isPressDown = false;
+               // let smooth = 20;
+                this.helpfillDown(1);
+                //while (this.isFillDown) {
+
+                //    await delay(smooth);
+                //    this.player_top++;
+                //    if (this.player_top >= this.backgroundLine) {
+                //        this.player_top = this.backgroundLine;
+                //        this.isFillDown = false;
+                //    }
+                //    smooth -= (40 / 100);
+                //}
+                //this.isLockDown = false;
+                //this.isPressDown = false;
             },
 
-            async jumpUp() {
+          async helpjumpUp(toTop,smooth) {
+                this.player_top -= smooth;
+                if (this.player_top <= this.maxTop) {
+                    this.player_top = this.maxTop;
+                    return;
+                }
+                if (!this.isFillDown && toTop <= this.player_top) {
+                    smooth -= smooth * 3 / 100;
+                    window.requestAnimationFrame(() => this.helpjumpUp(toTop, smooth));
+                } else {
+                       if (!this.isLockDown) {
+                        this.isLockDown = true;
+                        await delay(800);
+                        if (this.isFillDown == false) {
+                         this.fillDown();
+                        }
+                    }
+                }
+            },
+
+            jumpUp() {
 
                 if (this.player_top <= this.maxTop) {
                     return;
                 }
 
-                this.isFillDown = false;
-                let toTop = this.player_top - 100;
-                let smooth = 1;
-                while (!this.isFillDown && toTop <= this.player_top) {
-                    await delay(smooth);
-                    this.player_top--;
-                    if (this.player_top <= this.maxTop) {
-                        this.player_top = this.maxTop;
-                        break;
-                    }
-                    smooth += (20 / 100);
-                }
-                if (!this.isLockDown) {
-                    this.isLockDown = true;
-                    await delay(800);
-                    if (this.isFillDown == false) {
-                     this.fillDown();
-                    }
-                }
+                 this.isFillDown = false;
+                 let toTop = this.player_top - 100;
+                 //let smooth = 1;
+
+                 this.helpjumpUp(toTop, 5);
+
+                //while (!this.isFillDown && toTop <= this.player_top) {
+                //    await delay(smooth);
+                //    this.player_top--;
+                //    if (this.player_top <= this.maxTop) {
+                //        this.player_top = this.maxTop;
+                //        break;
+                //    }
+                //    smooth += (20 / 100);
+                //}
+
+                //if (!this.isLockDown) {
+                //    this.isLockDown = true;
+                //  //  await delay(800);
+                //    if (this.isFillDown == false) {
+                //     this.fillDown();
+                //    }
+                //}
             },
 
-            async forward() {
+            helpforward(toLeft) {
+                this.player_left++;
+                if (this.player_left >= this.maxLeft) {
+                    this.player_left = this.maxLeft;
+                    this.backward();
+                    return;
+                }
+                if (toLeft >= this.player_left && !this.isLockForward) {
+                    window.requestAnimationFrame(() => { this.helpforward(toLeft); });
+                }
+            },
+             
+             forward() {
                 this.isLockForward = false;
-                let toLeft = this.player_left + 10;
-                while (toLeft >= this.player_left && !this.isLockForward ) {
-                    await delay(30);
-                    this.player_left++;
-                    if (this.player_left >= this.maxLeft) {
-                        this.player_left = this.maxLeft;
-                        this.backward();
-                        break;
-                    }
-                }
-
+                 let toLeft = this.player_left + 10;
+                 this.helpforward(toLeft);
+             //   while (toLeft >= this.player_left && !this.isLockForward ) {
+                  //  await delay(30);
+                    //this.player_left++;
+                    //if (this.player_left >= this.maxLeft) {
+                    //    this.player_left = this.maxLeft;
+                    //    this.backward();
+                    //    return;
+                    //}
+               // }
+              
             },
 
-            async backward() {
-                this.isLockForward = true;
-                let toLeft = this.player_left - 10;
-                while (toLeft <= this.player_left && this.isLockForward) {
-                    await delay(30);
-                    this.player_left--;
-                    if (this.player_left <= this.minLeft) {
-                        this.player_left = this.minLeft;
-                        break;
-                    }
+            helpbackward(toLeft) {
+                this.player_left--;
+                if (this.player_left <= this.minLeft) {
+                    this.player_left = this.minLeft;
+                    return;
                 }
+                if (toLeft <= this.player_left && this.isLockForward)
+                    window.requestAnimationFrame(() => { this.helpbackward(toLeft); });
+            },
+
+             backward() {
+                this.isLockForward = true;
+                 let toLeft = this.player_left - 10;
+                 this.helpbackward(toLeft);
+                //while (toLeft <= this.player_left && this.isLockForward) {
+                //    await delay(30);
+                //    this.player_left--;
+                //    if (this.player_left <= this.minLeft) {
+                //        this.player_left = this.minLeft;
+                //        break;
+                //    }
+                //}
             }
 
 
@@ -270,10 +337,8 @@
 
     .testdev {
         position: absolute;
-        height: 100px;
+        height:100px;
         width: 100px;
-        left: 1100px;
-        top: 270px;
         background: red;
     }
   
