@@ -205,10 +205,9 @@
                 if (this.enemies.length == 0) {
                     this.enemies.push(this.createEnemy(randomNextInt(1, 4)));
                 }
-                console.log(this.caltoCreatEnemy , this.pointtoCreatEnemy);
                 if (this.caltoCreatEnemy >= this.pointtoCreatEnemy) {
                     this.enemies.push(this.createEnemy(randomNextInt(1, 4)));
-                    this.pointtoCreatEnemy = this.caltoCreatEnemy + randomNextInt(5, 50);
+                    this.pointtoCreatEnemy = this.caltoCreatEnemy + randomNextInt(50, 100);
                 }
 
                 //fire move
