@@ -1,9 +1,9 @@
 ﻿<template>
     <p> any keydown will block others -- move wisely <span class="keyBox">{{keydowned}}</span> </p>
-    <span  v-for="h in countdie" v-bind:key="h" class="hart"></span>
-    <h2  v-if="countdie==0" >You Lost</h2>
-    <button  v-if="countdie==0" class="btn btn-outline-success my-1" @click="restart">Play</button>
-  
+    <span v-for="h in countdie" v-bind:key="h" class="hart"></span>
+    <h2 v-if="countdie==0">You Lost</h2>
+    <button v-if="countdie==0" class="btn btn-outline-success my-1" @click="restart">Play</button>
+
     <div class="game">
         <img draggable="false" class="pic" src="../assets/ground.jpg" />
         <img draggable="false" class="pic wave-1" src="../assets/ground1.png" />
@@ -13,12 +13,23 @@
         <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
         <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
 
-        <div v-for="enemy in enemies" v-bind:key="enemy.id" v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}" v-bind:class="enemy.class"> </div>
+       
+           
+        <div v-for="enemy in enemies" v-bind:key="enemy.id"
+             v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
+             v-bind:class="enemy.class">
+            <div style="margin-top:-30px"><span v-for="h in enemy.hart" v-bind:key="h" class="star"></span></div>
+        </div>
 
+      
+
+        <div v-for="fire in fires" v-bind:key="fire" class="fireball" :style="{top:fire.top+'px',left:fire.left+'px'}"></div>
     </div>
 
 </template>
-
+<!--<div v-for="enemy in enemies" v-bind:key="enemy.id"
+      v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
+      v-bind:class="enemy.class"> </div>-->
 <script>
 
 
@@ -34,33 +45,33 @@
             rectB.y + rectB.height < rectA.y);
     }
 
-    (function preloadImage() {
-        let images = ["../assets/ground1.png", "../assets/ground2.png",
-            "../assets/ground3.png", "../assets/moon1.png",
-            "../assets/moon2.png", "../assets/man/flay/1.png",
-            "../assets/man/flay/2.png",
-            "../assets/man/flay/3.png",
-            "../assets/man/flay/4.png",
-            "../assets/man/flay/5.png",
-            "../assets/man/down.png",
-            "../assets/man/stand.png",
-            "../assets/man/run/1.png",
-            "../assets/man/run/2.png",
-            "../assets/man/run/3.png",
-            "../assets/man/run/4.png",
-            "../assets/man/run/5.png",
-        ];
-        let ims = []
-        for (var i in images) {
-            var img = new Image();
-            img.src = i;
-            ims.push(img);
-        }
-    })() //demons song
+    //(function preloadImage() {
+    //    let images = ["../assets/ground1.png", "../assets/ground2.png",
+    //        "../assets/ground3.png", "../assets/moon1.png",
+    //        "../assets/moon2.png", "../assets/man/flay/1.png",
+    //        "../assets/man/flay/2.png",
+    //        "../assets/man/flay/3.png",
+    //        "../assets/man/flay/4.png",
+    //        "../assets/man/flay/5.png",
+    //        "../assets/man/down.png",
+    //        "../assets/man/stand.png",
+    //        "../assets/man/run/1.png",
+    //        "../assets/man/run/2.png",
+    //        "../assets/man/run/3.png",
+    //        "../assets/man/run/4.png",
+    //        "../assets/man/run/5.png",
+    //    ];
+    //    let ims = []
+    //    for (var i in images) {
+    //        var img = new Image();
+    //        img.src = i;
+    //        ims.push(img);
+    //    }
+    //})() //demons song
 
-   function randomNextInt(min, max) {
-       return Math.floor(Math.random() * (max - min + 1) + min);
-   }
+    function randomNextInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
 
     export default {
 
@@ -83,6 +94,7 @@
                 keydowned: "",
                 countdie: 5,
                 enemies: [],
+                fires: [],
                 enemyKey: 0,
             }
         },
@@ -93,7 +105,7 @@
             this.maxLeft = 1000;
             this.maxTop = 0;
             this.backgroundLine = 380;
-            this.minTop = this.backgroundLine; 
+            this.minTop = this.backgroundLine;
             this.player_width = 120;
             this.player_height = 150;
             /////*****const
@@ -102,7 +114,13 @@
             this.pointtoCreatEnemy = 120;
             this.isLost = false;
 
-            window.addEventListener('keyup', () => { this.isPressMove = false; });
+            window.addEventListener('keyup', (e) => {
+                if (this.isLost) return;
+                this.isPressMove = false;
+                if (e.keyCode == 32) {
+                    this.shoot();
+                }
+            });
 
             window.addEventListener('keydown', async (e) => {
                 if (this.isLost) return;
@@ -125,9 +143,8 @@
                     this.backward();
                 }
 
-                //if (e.keyCode == 32) {
+            
 
-                //}
             });
 
         },
@@ -141,7 +158,7 @@
                         className = "run";
                     }
 
-                  //  className = "shootflay";
+                    //  className = "shootflay";
                 }
 
 
@@ -166,41 +183,82 @@
             },
 
             createEnemy(num) {
-               // let min_top = 10; 30   420
+                // let min_top = 10; 30   420
                 let _top = randomNextInt(30, 420);
                 switch (num) {
                     case 1:
-                        return { id: this.enemyKey++, top: _top, left: 1200, size:120, class: "enemy-1" };
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 120, class: "enemy-1", hart: 4 };
                     case 2:
-                        return { id: this.enemyKey++, top: _top, left: 1200, size: 100, class: "enemy-2" };
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 100, class: "enemy-2", hart: 3 };
                     case 3:
-                        return { id: this.enemyKey++, top: _top, left: 1200, size: 80, class: "enemy-3" };
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 80, class: "enemy-3", hart: 2 };
                     case 4:
-                        return { id: this.enemyKey++, top: _top, left: 1200, size: 60, class: "enemy-4" };
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 60, class: "enemy-4", hart: 1 };
                     default:
-                        return { id: this.enemyKey++, top: 0, left: 1200, size: 120, class: "enemy-moon" };
+                        return { id: this.enemyKey++, top: 0, left: 1200, size: 120, class: "enemy-moon", hart: 0 };
                 }
             },
-        
+
             runEnemies() {
 
                 this.caltoCreatEnemy++;
-                if (this.enemies.length==0) {
-                    this.enemies.push(this.createEnemy(randomNextInt(4,4)));
+                if (this.enemies.length == 0) {
+                    this.enemies.push(this.createEnemy(randomNextInt(1, 4)));
                 }
-             
-                if (this.caltoCreatEnemy == this.pointtoCreatEnemy) {
-                    this.enemies.push(this.createEnemy(randomNextInt(4, 4)));
-                    this.pointtoCreatEnemy = this.caltoCreatEnemy + randomNextInt(240, 1000);
+                console.log(this.caltoCreatEnemy , this.pointtoCreatEnemy);
+                if (this.caltoCreatEnemy >= this.pointtoCreatEnemy) {
+                    this.enemies.push(this.createEnemy(randomNextInt(1, 4)));
+                    this.pointtoCreatEnemy = this.caltoCreatEnemy + randomNextInt(5, 50);
                 }
 
-                for (var i = 0; i < this.enemies.length; i++) {
-                    this.enemies[i].left -= 1;
-                 
+                //fire move
+
+
+                for (let i = 0; i < this.fires.length; i++) {
+                    this.fires[i].left += 10;
+
+                    if (this.fires[i].left >= this.maxLeft) {
+                        this.fires.shift();
+                        break;
+                    }
+                    let offset = 30;
+                    for (let j = 0; j < this.enemies.length; j++) {
+
+                        let fire = {
+                            x: this.fires[i].left, y: this.fires[i].top,
+                            height: 50, width: 130
+                        };
+
+                        let enemy = {
+                            x: this.enemies[j].left + offset, y: this.enemies[j].top + offset,
+                            height: this.enemies[j].size - offset, width: this.enemies[j].size - offset
+                        };
+                        if (isInterscect(fire, enemy)) {
+
+                            if (--this.enemies[j].hart==0) {
+                                const index = this.enemies.indexOf(this.enemies[j]);
+                                if (index > -1) {
+                                    this.enemies.splice(index, 1);
+                                }
+                            }
+
+                            const f_index = this.fires.indexOf(this.fires[j]);
+                            if (f_index > -1) {
+                                this.fires.splice(f_index, 1);
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                //enemy move
+                for (let i = 0; i < this.enemies.length; i++) {
+                    this.enemies[i].left -= 2;
+
                     let offset = 30;
                     let player = { x: this.player_left + offset, y: this.player_top + offset, height: this.player_height - offset, width: this.player_width - offset };
                     let enemy = { x: this.enemies[i].left + offset, y: this.enemies[i].top + offset, height: this.enemies[i].size - offset, width: this.enemies[i].size - offset };
-                  
+
                     if (isInterscect(player, enemy)) {
                         this.backward(true);
                         this.countdie--; //lost
@@ -212,10 +270,16 @@
                     if (this.enemies[i].left == -this.enemies[i].size) {
                         this.enemies.shift();
                     }
-                    
+
                 }
+
+
                 if (!this.isLost)
-                window.requestAnimationFrame(this.runEnemies);
+                    window.requestAnimationFrame(this.runEnemies);
+            },
+
+            shoot() {
+                this.fires.push({ top: this.player_top + 40, left: this.player_left + 10 });
             },
 
             helpfillDown(smooth) {
@@ -313,27 +377,28 @@
                     speed = 10;
                     this.isForward = false;
                     this.isFillDown = false;
-                    this.isPressDown= false;
+                    this.isPressDown = false;
                     this.isPressMove = false;
-                } 
+                }
                 this.helpbackward(toLeft, speed);
 
             },
 
             restart() {
-                this.player_top = 180,
-                this.player_left = 160,
-                this.isFillDown = true,
-                this.isLockDown = false,
-                this.isLockForward = false,
-                this.isPressDown = false,
-                this.isPressMove = false,
-                this.isForward = false,
-                this.keydowned = "",
-                this.countdie = 5,
-                this.enemies = [],
-                this.enemyKey = 0,
-                this.caltoCreatEnemy = 0;
+                this.player_top = 180;
+                this.player_left = 160;
+                    this.isFillDown = true;
+                    this.isLockDown = false;
+                    this.isLockForward = false;
+                    this.isPressDown = false;
+                    this.isPressMove = false;
+                    this.isForward = false;
+                    this.keydowned = "";
+                    this.countdie = 5;
+                    this.enemies = [];
+                    this.fires = [];
+                    this.enemyKey = 0;
+                    this.caltoCreatEnemy = 0;
                 this.pointtoCreatEnemy = 120;
                 this.isLost = false;
                 this.fillDown();
@@ -343,7 +408,7 @@
         },
 
         mounted() {
-        
+
             this.fillDown();
             this.runEnemies();
         },
@@ -359,6 +424,11 @@
         content: '❤';
         color: red;
         font-size: 24px;
+    }
+    .star:after {
+        content: '⭐';
+        color: darkgoldenrod;
+        font-size: 16px;
     }
 
     .enemy-1 {
@@ -378,17 +448,27 @@
     .enemy-3 {
         position: absolute;
         height: 80px;
-        width:80px;
+        width: 80px;
         background: url(../assets/enemy/3.png) no-repeat;
     }
 
     .enemy-4 {
         position: absolute;
         height: 60px;
-        width:60px;
+        width: 60px;
         background: url(../assets/enemy/4.png) no-repeat;
     }
 
+    .fireball {
+        position: absolute;
+        transform: scaleX(-1);
+        width: 130px;
+        height: 50px;
+        padding: 0;
+        background-size: 100% 100% !important;
+        background: url(../assets/fire.gif) no-repeat;
+    }
+    /*512 197  2.5989*/
 
     .enemy-moon {
         position: absolute;
@@ -397,7 +477,7 @@
         background: url(../assets/enemy/moon.png) no-repeat;
     }
 
-  /*  @keyframes spin {
+    /*  @keyframes spin {
         100% {
             transform: rotate(360deg);
         }
@@ -450,7 +530,7 @@
         animation: shootflay 0.6s linear infinite;
     }
 
-  
+
 
     @keyframes shootflay {
         0% {
@@ -472,7 +552,6 @@
         100% {
             background: url(../assets/man/shootflay/1.png) no-repeat;
         }
-
     }
 
     @keyframes run {
