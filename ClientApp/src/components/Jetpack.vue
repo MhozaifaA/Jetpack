@@ -4,7 +4,7 @@
     <h2 v-if="countdie==0">You Lost</h2>
     <button v-if="countdie==0" class="btn btn-outline-success my-1" @click="restart">Play</button>
 
-    <div class="game">
+    <div class="game" v-bind:class="losteffect">
         <img draggable="false" class="pic" src="../assets/ground.jpg" />
         <img draggable="false" class="pic wave-1" src="../assets/ground1.png" />
         <img draggable="false" class="pic wave-2" src="../assets/ground2.png" />
@@ -92,6 +92,7 @@
                 isPressMove: false,
                 isForward: false,
                 keydowned: "",
+                losteffect:"",
                 countdie: 5,
                 enemies: [],
                 fires: [],
@@ -168,9 +169,19 @@
         },
 
         watch: {
-            //isFillDown() {
-            //    console.log("change fill");
-            //},
+            countdie() {
+                this.losteffect = "hart-effect";
+                if (this.isLost) {
+                    this.losteffect = "redshadow";
+                } else {
+                    setTimeout(() => {
+                        this.losteffect = "";
+                        if (this.isLost) {
+                            this.losteffect = "redshadow";
+                        }
+                    }, 2000);
+                }
+            }
         },
 
         methods: {
@@ -268,11 +279,14 @@
                     }
 
                     if (this.enemies[i].left == -this.enemies[i].size) {
-                        this.enemies.shift();
+                       // this.enemies.shift();
+                        const index = this.enemies.indexOf(this.enemies[i]);
+                        if (index > -1) {
+                            this.enemies.splice(index, 1);
+                        }
                     }
 
                 }
-
 
                 if (!this.isLost)
                     window.requestAnimationFrame(this.runEnemies);
@@ -626,7 +640,27 @@
         height: 560px;
         margin: auto;
         overflow: hidden;
-        box-shadow: inset 0 0 30px red;
+        box-shadow: inset 0 0 0px red;
+    }
+    .redshadow {
+        box-shadow: inset 0 0 40px red;
+        animation: depthlosteffect 2s linear infinite;
+    }
+    .game.hart-effect {
+        animation: losteffect 2s ease 1;
+    }
+
+    @keyframes depthlosteffect {
+        50% {
+            box-shadow: inset 0 0 80px red;
+        }
+       
+    }
+
+    @keyframes losteffect {
+        50% {
+            box-shadow: inset 0 0 40px red;
+        }
     }
 
     .pic {
