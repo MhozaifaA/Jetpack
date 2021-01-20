@@ -1,4 +1,5 @@
 ﻿<template>
+  
     <div>
         <label class="mx-2 font-weight-bold">Enemies:{{killedEnemies}}</label>
         <label class="mx-2 font-weight-bold">Coins:{{coinsplayer}}</label>
@@ -19,7 +20,7 @@
             <rating :count="enemy.hart" kind="star"></rating>
         </enemy>
 
-        <coin  v-for="coin in coins" v-bind:key="coin" :coin="coin"  ></coin>
+        <coin v-for="coin in coins" v-bind:key="coin" :coin="coin"></coin>
 
         <fireball v-for="fire in fires" v-bind:key="fire" :fire="fire" />
 
@@ -107,7 +108,8 @@
                 isLost: false,
                 killedEnemies:0,
                 coinsplayer:0,
-                coins:[],
+                coins: [],
+                sound: true
             }
         },
 
@@ -124,7 +126,7 @@
 
             this.caltoCreatEnemy = 0;
             this.pointtoCreatEnemy = 120;
-          
+
 
             window.addEventListener('keyup', (e) => {
                 if (this.isLost) return;
@@ -480,10 +482,11 @@
                 this.runEnemies();
             },
 
+           
         },
 
         mounted() {
-
+          
             this.fillDown();
             this.runEnemies();
         },
