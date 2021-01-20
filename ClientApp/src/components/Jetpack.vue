@@ -97,6 +97,7 @@
                 enemies: [],
                 fires: [],
                 enemyKey: 0,
+                isLost : false,
             }
         },
 
@@ -113,7 +114,7 @@
 
             this.caltoCreatEnemy = 0;
             this.pointtoCreatEnemy = 120;
-            this.isLost = false;
+          
 
             window.addEventListener('keyup', (e) => {
                 if (this.isLost) return;
@@ -152,6 +153,7 @@
 
         computed: {
             changeClass: function () {
+               
                 let className = this.isPressDown ? 'down' : 'flay';
                 if (this.player_top == this.backgroundLine) {
                     className = "stand";
@@ -161,9 +163,9 @@
 
                     //  className = "shootflay";
                 }
-
-
-
+                if (this.isLost) {
+                    className = "die";
+                }
                 return className;
             }
         },
@@ -181,7 +183,8 @@
                         }
                     }, 2000);
                 }
-            }
+            },
+          
         },
 
         methods: {
@@ -544,6 +547,26 @@
         animation: shootflay 0.6s linear infinite;
     }
 
+    .die {
+        animation: die 1s linear infinite;
+    }
+    @keyframes die {
+        0% {
+            background: url(../assets/man/die/7.png) no-repeat;
+        }
+
+        33.3% {
+            background: url(../assets/man/die/8.png) no-repeat;
+        }
+
+        66.6% {
+            background: url(../assets/man/die/9.png) no-repeat;
+        }
+
+        100% {
+            background: url(../assets/man/die/10.png) no-repeat;
+        }
+    }
 
 
     @keyframes shootflay {
