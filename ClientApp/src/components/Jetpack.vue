@@ -1,7 +1,7 @@
 ﻿<template>
     <div>
-        <label class="mx-2">Number of Kill:{{killedEnemies}}</label>
-        <label class="mx-2">Coins:{{coinsplayer}}</label>
+        <label class="mx-2 font-weight-bold">Enemies:{{killedEnemies}}</label>
+        <label class="mx-2 font-weight-bold">Coins:{{coinsplayer}}</label>
     </div>
     <p> any keydown will block others -- move wisely <span class="keyBox">{{keydowned}}</span> </p>
     <rating :count="countdie" kind="hart"></rating>
@@ -19,7 +19,7 @@
             <rating :count="enemy.hart" kind="star"></rating>
         </enemy>
 
-        <div class="coin" v-for="coin in coins" v-bind:key="coin" v-bind:style="{left:coin.left+'px'}"  ></div>
+        <coin  v-for="coin in coins" v-bind:key="coin" :coin="coin"  ></coin>
 
         <fireball v-for="fire in fires" v-bind:key="fire" :fire="fire" />
 
@@ -33,6 +33,7 @@
     import player from "./player"
     import fireball from "./fireball"
     import enemy from "./enemy"
+    import coin from "./coin"
 
 
     function delay(ms) {
@@ -83,7 +84,8 @@
             player,
             rating,
             fireball,
-            enemy
+            enemy,
+            coin
         },
 
         data() {
@@ -424,7 +426,7 @@
 
             forward() {
                 this.isLockForward = false;
-                let toLeft = this.player_left + 10;
+                let toLeft = this.player_left + 15;
                 this.helpforward(toLeft);
             },
 
@@ -467,12 +469,13 @@
                 this.countdie = 5;
                 this.enemies = [];
                 this.fires = [];
+                this.coins = [];
                 this.enemyKey = 0;
                 this.caltoCreatEnemy = 0;
                 this.pointtoCreatEnemy = 120;
                 this.isLost = false;
                 this.killedEnemies = 0;
-
+                this.coinsplayer = 0;
                 this.fillDown();
                 this.runEnemies();
             },
@@ -492,35 +495,9 @@
 
 <style scoped>
 
-    .coin {
-        position: absolute;
-        height: 60px;
-        width: 59px;
-        top:460px;
-        background: url(../assets/coins/1.png) no-repeat;
-        animation: coin 1s linear infinite;
-    }
+  
 
-    @keyframes coin{
-        0% {
-            background: url(../assets/coins/1.png) no-repeat;
-        }
-        20% {
-            background: url(../assets/coins/2.png) no-repeat;
-        }
-        40% {
-            background: url(../assets/coins/3.png) no-repeat;
-        }
-        60% {
-            background: url(../assets/coins/4.png) no-repeat;
-        }
-        80% {
-            background: url(../assets/coins/5.png) no-repeat;
-        }
-        100% {
-            background: url(../assets/coins/6.png) no-repeat;
-        }
-    }
+   
 
     * {
         user-select: none;
