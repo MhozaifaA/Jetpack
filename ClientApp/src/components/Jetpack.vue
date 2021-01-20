@@ -16,10 +16,10 @@
              v-bind:class="enemy.class">
             <div style="margin-top:-30px">
                 <rating :count="enemy.hart" kind="star"></rating>
-          </div>
+            </div>
         </div>
-
-        <div v-for="fire in fires" v-bind:key="fire" class="fireball" :style="{top:fire.top+'px',left:fire.left+'px'}"></div>
+       
+        <fireball  v-for="fire in fires"  v-bind:key="fire"  :fire="fire"></fireball>
 
     </div>
 
@@ -31,6 +31,7 @@
     import groundspace from "./groundspace"
     import player from "./player"
     import rating from "./rating"
+    import fireball from "./fireball"
 
 
     function delay(ms) {
@@ -79,7 +80,8 @@
         components: {
             groundspace,
             player,
-            rating
+            rating,
+            fireball
         },
 
         data() {
@@ -467,16 +469,7 @@
         background: url(../assets/enemy/4.png) no-repeat;
     }
 
-    .fireball {
-        position: absolute;
-        transform: scaleX(-1);
-        width: 130px;
-        height: 50px;
-        padding: 0;
-        background-size: 100% 100% !important;
-        background: url(../assets/fire.gif) no-repeat;
-    }
-    /*512 197  2.5989*/
+   
 
     .enemy-moon {
         position: absolute;
