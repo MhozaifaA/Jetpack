@@ -5,23 +5,16 @@
     <button v-if="countdie==0" class="btn btn-outline-success my-1" @click="restart">Play</button>
 
     <div class="game" v-bind:class="losteffect">
-        <img draggable="false" class="pic" src="../assets/ground.jpg" />
-        <img draggable="false" class="pic wave-1" src="../assets/ground1.png" />
-        <img draggable="false" class="pic wave-2" src="../assets/ground2.png" />
-        <img draggable="false" class="pic wave-1" src="../assets/ground3.png" />
-        <img draggable="false" class="pic wave-2" src="../assets/moon1.png" />
-        <img draggable="false" class="pic wave-3" src="../assets/moon2.png" />
-        <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
-
        
-           
+        <groundspace></groundspace>
+
+        <div id="palyer" v-bind:class="changeClass" v-bind:style="{top:player_top+'px',left:player_left+'px'}" />
+       
         <div v-for="enemy in enemies" v-bind:key="enemy.id"
              v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
              v-bind:class="enemy.class">
             <div style="margin-top:-30px"><span v-for="h in enemy.hart" v-bind:key="h" class="star"></span></div>
         </div>
-
-      
 
         <div v-for="fire in fires" v-bind:key="fire" class="fireball" :style="{top:fire.top+'px',left:fire.left+'px'}"></div>
     </div>
@@ -31,7 +24,7 @@
       v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
       v-bind:class="enemy.class"> </div>-->
 <script>
-
+    import groundspace from "./groundspace"
 
 
     function delay(ms) {
@@ -78,7 +71,7 @@
         name: "Jetpack",
 
         components: {
-
+            groundspace,
         },
 
         data() {
@@ -686,46 +679,5 @@
         }
     }
 
-    .pic {
-        position: absolute;
-        width: 100%;
-        top: 0;
-        left: 0;
-        object-fit: cover;
-        z-index:-1;
-    }
-
-    .wave-1 {
-        animation: wave-1 3s ease-in-out infinite;
-    }
-
-    .wave-2 {
-        animation: wave-2 3s ease-in-out infinite;
-    }
-
-    .wave-3 {
-        animation: wave-3 3s ease-in-out infinite;
-    }
-
-    @keyframes wave-1 {
-        50% {
-            top: -20px;
-            left: 10px;
-        }
-    }
-
-    @keyframes wave-2 {
-        50% {
-            top: -5px;
-            left: 20px;
-        }
-    }
-
-    @keyframes wave-3 {
-        50% {
-            top: 5px;
-            left: 5px;
-        }
-    }
 </style>
 
