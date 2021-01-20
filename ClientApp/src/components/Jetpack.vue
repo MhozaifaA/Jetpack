@@ -1,4 +1,8 @@
 ﻿<template>
+    <div>
+        <label class="mx-2">Number of Kill:{{killedEnemies}}</label>
+        <label class="mx-2">Coins:{{coinsplayer}}</label>
+    </div>
     <p> any keydown will block others -- move wisely <span class="keyBox">{{keydowned}}</span> </p>
     <rating :count="countdie" kind="hart"></rating>
     <h2 v-if="countdie==0">You Lost</h2>
@@ -6,22 +10,23 @@
 
     <div class="game" v-bind:class="losteffect">
 
-        <groundspace/>
+        <groundspace />
 
-        <player :player_top="player_top" :player_left="player_left" :changeClass="changeClass"/>
+        <player :player_top="player_top" :player_left="player_left" :changeClass="changeClass" />
+
 
         <enemy v-for="enemy in enemies" v-bind:key="enemy.id" :enemy="enemy">
             <rating :count="enemy.hart" kind="star"></rating>
         </enemy>
 
-        <fireball v-for="fire in fires" v-bind:key="fire" :fire="fire"/>
+        <div class="coin" v-for="coin in coins" v-bind:key="coin" v-bind:style="{left:coin.left+'px'}"  ></div>
+
+        <fireball v-for="fire in fires" v-bind:key="fire" :fire="fire" />
 
     </div>
 
 </template>
-<!--<div v-for="enemy in enemies" v-bind:key="enemy.id"
-      v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
-      v-bind:class="enemy.class"> </div>-->
+
 <script>
     import rating from "./rating"
     import groundspace from "./groundspace"
@@ -97,7 +102,10 @@
                 enemies: [],
                 fires: [],
                 enemyKey: 0,
-                isLost : false,
+                isLost: false,
+                killedEnemies:0,
+                coinsplayer:0,
+                coins:[],
             }
         },
 
@@ -214,7 +222,26 @@
                 }
             },
 
+            createCoins() {
+                let isCreate = randomNextInt(0, 1000) > 995;
+                const offset = 70;
+                let nextStartleft = 1200;
+                if (this.coins.length > 0) {
+                    let last = this.coins[this.coins.length-1];
+                    if (last.left>1200) {
+                        nextStartleft = last.left + 2 * offset;
+                    }
+                }
+                if (isCreate) {
+                    let numofcoin = randomNextInt(1, 10);
+                    for (var i = 0; i < numofcoin; i++) {
+                        this.coins.push({ left: nextStartleft + ((i) * offset) });
+                    }
+                }
+            },
+
             runEnemies() {
+                
 
                 this.caltoCreatEnemy++;
                 if (this.enemies.length == 0) {
@@ -225,9 +252,34 @@
                     this.pointtoCreatEnemy = this.caltoCreatEnemy + randomNextInt(50, 100);
                 }
 
+                this.createCoins();
+
+                //coin move
+                for (let i = 0; i < this.coins.length; i++) {
+                    this.coins[i].left -= 3;
+
+                    if (this.coins[i].left <= -60) {
+                        const index = this.coins.indexOf(this.coins[i]);
+                        if (index > -1) {
+                            this.coins.splice(index, 1);
+                        }
+                    }
+
+                    let offset = 30;
+                    let player = { x: this.player_left + offset, y: this.player_top + offset, height: this.player_height - offset, width: this.player_width - offset };
+                    let coin = { x: this.coins[i].left, y: 460, height: 60, width: 59 };
+
+                    if (isInterscect(player, coin)) {
+                        this.coinsplayer++;
+                        const index = this.coins.indexOf(this.coins[i]);
+                        if (index > -1) {
+                            this.coins.splice(index, 1);
+                        }
+                    }
+                }
+
+
                 //fire move
-
-
                 for (let i = 0; i < this.fires.length; i++) {
                     this.fires[i].left += 10;
 
@@ -249,7 +301,8 @@
                         };
                         if (isInterscect(fire, enemy)) {
 
-                            if (--this.enemies[j].hart==0) {
+                            if (--this.enemies[j].hart == 0) {
+                                this.killedEnemies++;
                                 const index = this.enemies.indexOf(this.enemies[j]);
                                 if (index > -1) {
                                     this.enemies.splice(index, 1);
@@ -281,7 +334,7 @@
                         }
                     }
 
-                    if (this.enemies[i].left == -this.enemies[i].size) {
+                    if (this.enemies[i].left <= -this.enemies[i].size) {
                        // this.enemies.shift();
                         const index = this.enemies.indexOf(this.enemies[i]);
                         if (index > -1) {
@@ -418,6 +471,8 @@
                 this.caltoCreatEnemy = 0;
                 this.pointtoCreatEnemy = 120;
                 this.isLost = false;
+                this.killedEnemies = 0;
+
                 this.fillDown();
                 this.runEnemies();
             },
@@ -437,6 +492,36 @@
 
 <style scoped>
 
+    .coin {
+        position: absolute;
+        height: 60px;
+        width: 59px;
+        top:460px;
+        background: url(../assets/coins/1.png) no-repeat;
+        animation: coin 1s linear infinite;
+    }
+
+    @keyframes coin{
+        0% {
+            background: url(../assets/coins/1.png) no-repeat;
+        }
+        20% {
+            background: url(../assets/coins/2.png) no-repeat;
+        }
+        40% {
+            background: url(../assets/coins/3.png) no-repeat;
+        }
+        60% {
+            background: url(../assets/coins/4.png) no-repeat;
+        }
+        80% {
+            background: url(../assets/coins/5.png) no-repeat;
+        }
+        100% {
+            background: url(../assets/coins/6.png) no-repeat;
+        }
+    }
+
     * {
         user-select: none;
         user-drag: none;
@@ -454,6 +539,7 @@
         text-transform: capitalize;
         margin: 2px;
     }
+
    
     .game {
         position: relative;
