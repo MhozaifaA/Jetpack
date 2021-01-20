@@ -267,6 +267,7 @@
                         if (index > -1) {
                             this.coins.splice(index, 1);
                         }
+                        break;
                     }
 
                     let offset = 30;
