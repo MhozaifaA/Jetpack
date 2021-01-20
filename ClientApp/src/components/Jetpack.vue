@@ -185,17 +185,18 @@
             createEnemy(num) {
                 // let min_top = 10; 30   420
                 let _top = randomNextInt(30, 420);
+                let _speed = randomNextInt(1, 10);
                 switch (num) {
                     case 1:
-                        return { id: this.enemyKey++, top: _top, left: 1200, size: 120, class: "enemy-1", hart: 4 };
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 120, class: "enemy-1", speed:_speed, hart: 4 };
                     case 2:
-                        return { id: this.enemyKey++, top: _top, left: 1200, size: 100, class: "enemy-2", hart: 3 };
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 100, class: "enemy-2", speed: _speed,  hart: 3 };
                     case 3:
-                        return { id: this.enemyKey++, top: _top, left: 1200, size: 80, class: "enemy-3", hart: 2 };
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 80, class: "enemy-3", speed: _speed,  hart: 2 };
                     case 4:
-                        return { id: this.enemyKey++, top: _top, left: 1200, size: 60, class: "enemy-4", hart: 1 };
+                        return { id: this.enemyKey++, top: _top, left: 1200, size: 60, class: "enemy-4", speed: _speed,  hart: 1 };
                     default:
-                        return { id: this.enemyKey++, top: 0, left: 1200, size: 120, class: "enemy-moon", hart: 0 };
+                        return { id: this.enemyKey++, top: 0, left: 1200, size: 120, class: "enemy-moon", speed: _speed,  hart: 0 };
                 }
             },
 
@@ -241,7 +242,7 @@
                                 }
                             }
 
-                            const f_index = this.fires.indexOf(this.fires[j]);
+                            const f_index = this.fires.indexOf(this.fires[i]);
                             if (f_index > -1) {
                                 this.fires.splice(f_index, 1);
                             }
@@ -252,7 +253,7 @@
 
                 //enemy move
                 for (let i = 0; i < this.enemies.length; i++) {
-                    this.enemies[i].left -= 2;
+                    this.enemies[i].left -= this.enemies[i].speed;
 
                     let offset = 30;
                     let player = { x: this.player_left + offset, y: this.player_top + offset, height: this.player_height - offset, width: this.player_width - offset };
@@ -386,18 +387,18 @@
             restart() {
                 this.player_top = 180;
                 this.player_left = 160;
-                    this.isFillDown = true;
-                    this.isLockDown = false;
-                    this.isLockForward = false;
-                    this.isPressDown = false;
-                    this.isPressMove = false;
-                    this.isForward = false;
-                    this.keydowned = "";
-                    this.countdie = 5;
-                    this.enemies = [];
-                    this.fires = [];
-                    this.enemyKey = 0;
-                    this.caltoCreatEnemy = 0;
+                this.isFillDown = true;
+                this.isLockDown = false;
+                this.isLockForward = false;
+                this.isPressDown = false;
+                this.isPressMove = false;
+                this.isForward = false;
+                this.keydowned = "";
+                this.countdie = 5;
+                this.enemies = [];
+                this.fires = [];
+                this.enemyKey = 0;
+                this.caltoCreatEnemy = 0;
                 this.pointtoCreatEnemy = 120;
                 this.isLost = false;
                 this.fillDown();
@@ -623,9 +624,9 @@
         position: relative;
         width: 1200px;
         height: 560px;
-        background: red;
         margin: auto;
         overflow: hidden;
+        box-shadow: inset 0 0 30px red;
     }
 
     .pic {
@@ -634,6 +635,7 @@
         top: 0;
         left: 0;
         object-fit: cover;
+        z-index:-1;
     }
 
     .wave-1 {
