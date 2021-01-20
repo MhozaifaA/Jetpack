@@ -1,6 +1,6 @@
 ﻿<template>
     <p> any keydown will block others -- move wisely <span class="keyBox">{{keydowned}}</span> </p>
-    <span v-for="h in countdie" v-bind:key="h" class="hart"></span>
+    <rating :count="countdie" kind="hart"></rating>
     <h2 v-if="countdie==0">You Lost</h2>
     <button v-if="countdie==0" class="btn btn-outline-success my-1" @click="restart">Play</button>
 
@@ -14,13 +14,15 @@
         <div v-for="enemy in enemies" v-bind:key="enemy.id"
              v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
              v-bind:class="enemy.class">
-            <div style="margin-top:-30px"><span v-for="h in enemy.hart" v-bind:key="h" class="star"></span></div>
+            <div style="margin-top:-30px">
+                <rating :count="enemy.hart" kind="star"></rating>
+          </div>
         </div>
 
         <div v-for="fire in fires" v-bind:key="fire" class="fireball" :style="{top:fire.top+'px',left:fire.left+'px'}"></div>
 
     </div>
-   
+
 </template>
 <!--<div v-for="enemy in enemies" v-bind:key="enemy.id"
       v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
@@ -28,6 +30,7 @@
 <script>
     import groundspace from "./groundspace"
     import player from "./player"
+    import rating from "./rating"
 
 
     function delay(ms) {
@@ -75,7 +78,8 @@
 
         components: {
             groundspace,
-            player
+            player,
+            rating
         },
 
         data() {
@@ -433,18 +437,8 @@
 
 
 <style scoped>
-
-    .hart::after {
-        content: '❤';
-        color: red;
-        font-size: 24px;
-    }
-    .star:after {
-        content: '⭐';
-        color: darkgoldenrod;
-        font-size: 16px;
-    }
-
+  
+   
     .enemy-1 {
         position: absolute;
         height: 120px;
@@ -523,7 +517,7 @@
         box-shadow: inset 0 0 0px red;
     }
     .redshadow {
-        box-shadow: inset 0 0 40px red;
+        box-shadow: inset 0 0 30px red;
         animation: depthlosteffect 2s linear infinite;
     }
     .game.hart-effect {
