@@ -6,20 +6,15 @@
 
     <div class="game" v-bind:class="losteffect">
 
-        <groundspace></groundspace>
+        <groundspace/>
 
-        <player :player_top="player_top" :player_left="player_left" :changeClass="changeClass"></player>
+        <player :player_top="player_top" :player_left="player_left" :changeClass="changeClass"/>
 
+        <enemy v-for="enemy in enemies" v-bind:key="enemy.id" :enemy="enemy">
+            <rating :count="enemy.hart" kind="star"></rating>
+        </enemy>
 
-        <div v-for="enemy in enemies" v-bind:key="enemy.id"
-             v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
-             v-bind:class="enemy.class">
-            <div style="margin-top:-30px">
-                <rating :count="enemy.hart" kind="star"></rating>
-            </div>
-        </div>
-       
-        <fireball  v-for="fire in fires"  v-bind:key="fire"  :fire="fire"></fireball>
+        <fireball v-for="fire in fires" v-bind:key="fire" :fire="fire"/>
 
     </div>
 
@@ -28,10 +23,11 @@
       v-bind:style="{top:enemy.top+'px',left:enemy.left+'px',width:enemy.size+'px',height:enemy.size+'px'}"
       v-bind:class="enemy.class"> </div>-->
 <script>
+    import rating from "./rating"
     import groundspace from "./groundspace"
     import player from "./player"
-    import rating from "./rating"
     import fireball from "./fireball"
+    import enemy from "./enemy"
 
 
     function delay(ms) {
@@ -81,7 +77,8 @@
             groundspace,
             player,
             rating,
-            fireball
+            fireball,
+            enemy
         },
 
         data() {
@@ -439,50 +436,12 @@
 
 
 <style scoped>
-  
-   
-    .enemy-1 {
-        position: absolute;
-        height: 120px;
-        width: 120px;
-        background: url(../assets/enemy/1.png) no-repeat;
+
+    * {
+        user-select: none;
+        user-drag: none;
     }
 
-    .enemy-2 {
-        position: absolute;
-        height: 100px;
-        width: 100px;
-        background: url(../assets/enemy/2.png) no-repeat;
-    }
-
-    .enemy-3 {
-        position: absolute;
-        height: 80px;
-        width: 80px;
-        background: url(../assets/enemy/3.png) no-repeat;
-    }
-
-    .enemy-4 {
-        position: absolute;
-        height: 60px;
-        width: 60px;
-        background: url(../assets/enemy/4.png) no-repeat;
-    }
-
-   
-
-    .enemy-moon {
-        position: absolute;
-        height: 120px;
-        width: 120px;
-        background: url(../assets/enemy/moon.png) no-repeat;
-    }
-
-    /*  @keyframes spin {
-        100% {
-            transform: rotate(360deg);
-        }
-    }*/
 
     .keyBox {
         border-style: solid;
@@ -495,12 +454,7 @@
         text-transform: capitalize;
         margin: 2px;
     }
-
-    * {
-        user-select: none;
-        user-drag: none;
-    }
-
+   
     .game {
         position: relative;
         width: 1200px;

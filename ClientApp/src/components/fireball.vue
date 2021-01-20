@@ -8,7 +8,7 @@
 
         name: "fireball",
         props: {
-            fire: Objectww,
+            fire: Object,
         }
 
     }
