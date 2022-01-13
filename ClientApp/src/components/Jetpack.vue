@@ -4,8 +4,13 @@
         <label class="mx-2 font-weight-bold">Enemies:{{killedEnemies}}</label>
         <label class="mx-2 font-weight-bold">Coins:{{coinsplayer}}</label>
     </div>
-    <p> any keydown will block others -- move wisely <span class="keyBox">{{keydowned}}</span> </p>
+    <p> any keydown will block others -- move wisely  try Key 'G' <span class="keyBox">{{keydowned}}</span> </p>
+
+
     <rating :count="countdie" kind="hart"></rating>
+    <br>
+    <rating :count="power" kind="power"></rating>
+
     <h2 v-if="countdie==0">You Lost</h2>
     <button v-if="countdie==0" class="btn btn-outline-success my-1" @click="restart">Play</button>
 
@@ -109,7 +114,8 @@
                 killedEnemies:0,
                 coinsplayer:0,
                 coins: [],
-                sound: true
+                sound: true,
+                power:5,
             }
         },
 
@@ -127,6 +133,15 @@
             this.caltoCreatEnemy = 0;
             this.pointtoCreatEnemy = 120;
 
+
+            window.addEventListener('keyup', (e) => {
+                if (this.isLost) return;
+                this.isPressMove = false;
+                if (e.keyCode == 71 && this.power>0) {
+                    this.fireRain();
+                    this.power--;
+                }
+            });
 
             window.addEventListener('keyup', (e) => {
                 if (this.isLost) return;
@@ -355,6 +370,12 @@
 
             shoot() {
                 this.fires.push({ top: this.player_top + 40, left: this.player_left + 10 });
+            },
+            fireRain() {
+                for(let  i=0 ;i<25;i+=1)
+                {
+                    this.fires.push({ top: 20*i + 0, left: 10 });
+                }
             },
 
             helpfillDown(smooth) {

@@ -20,6 +20,12 @@
         font-size: 24px;
     }
 
+    .power::after {
+        content: '⚡';
+        color: yellow;
+        font-size: 20px;
+    }
+
     .star:after {
         content: '⭐';
         color: darkgoldenrod;
